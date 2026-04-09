@@ -297,7 +297,7 @@
     }
     function finalizarPedido() {
         if(carrinho.length === 0) return;
-        let msg = "oi, finalizei meu carrinho no seu site.\n\n";
+        let msg = "oi, finalizei meu carrinho.\n\n";
         carrinho.forEach(i => msg += `- ${i.nome}\n`);
         msg += `\n*TOTAL: R$ ${document.getElementById('total-carrinho').innerText}*`;
         window.open(`https://wa.me/5521970808960?text=${encodeURIComponent(msg)}`);
