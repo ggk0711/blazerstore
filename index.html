@@ -2,7 +2,8 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
 <script>
-   const firebaseConfig = {
+   
+{
   apiKey: "AIzaSyD6Y17O72tr0hLRcKw9q8NQHbjnCK9RUeo",
   authDomain: "blazerstore-d42ab.firebaseapp.com",
   projectId: "blazerstore-d42ab",
@@ -12,7 +13,7 @@
   measurementId: "G-BTQ7MCLXMF"
 };
 
-    // Inicializar Firebase
+    
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -21,14 +22,14 @@
     let carrinho = [];
     let imgBase64 = "";
 
-    // 2. ESCUTAR MUDANÇAS NO BANCO DE DADOS (Funciona para todos os usuários)
+    
     db.ref('produtos').on('value', (snapshot) => {
         const data = snapshot.val();
         produtos = data ? Object.values(data) : [];
         renderLoja();
     });
 
-    // Função para Adicionar no Firebase (Substitui o localStorage)
+    
     function addProduto() {
         const nome = document.getElementById('new-nome').value;
         const preco = parseFloat(document.getElementById('new-preco').value);
@@ -50,7 +51,7 @@
         }
     }
 
-    // Função para Excluir do Firebase
+    
     function excluirItem(id) {
         // Encontra a chave do item no Firebase baseada no ID
         db.ref('produtos').once('value', snapshot => {
@@ -62,7 +63,7 @@
         });
     }
 
-    // --- Configuração da DropZone (Mantida) ---
+    
     const fileInput = document.getElementById('fileInput');
     const imgPreview = document.getElementById('img-preview');
     const dropZone = document.getElementById('dropZone');
@@ -88,7 +89,7 @@
         }
     }
 
-    // --- Funções de Interface ---
+    
     function renderLoja() {
         const lista = document.getElementById('produtos-lista');
         lista.innerHTML = '';
