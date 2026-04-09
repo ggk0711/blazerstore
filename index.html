@@ -1,208 +1,79 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blazer Store | Nether Edition</title>
-    <style>
-        :root {
-            --nether-dark: #1a0a0a;
-            --nether-red: #3d0c0c;
-            --lava: #ff4d00;
-            --gold: #ffcc00;
-            --text: #f0f0f0;
-        }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
-                        url('https://minecraft.wiki/images/thumb/Nether_Wastes_BE1.png/1200px-Nether_Wastes_BE1.png');
-            background-attachment: fixed;
-            background-size: cover;
-            color: var(--text);
-            margin: 0; padding: 0;
-            overflow-x: hidden;
-        }
-
-        .promo-bar {
-            background: linear-gradient(90deg, var(--lava), #ff8800);
-            color: white; text-align: center; padding: 12px;
-            font-weight: bold; text-transform: uppercase;
-        }
-
-        header {
-            padding: 40px 20px; text-align: center;
-            background: rgba(61, 12, 12, 0.95);
-            border-bottom: 4px solid var(--lava);
-        }
-
-        .container { max-width: 1100px; margin: auto; padding: 20px; }
-
-        #produtos-lista {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-        }
-
-        .produto-card {
-            background: rgba(40, 15, 15, 0.9); border: 2px solid var(--nether-red);
-            padding: 20px; text-align: center; border-radius: 12px; transition: 0.3s;
-        }
-
-        .produto-card img {
-            width: 160px; height: 160px; image-rendering: pixelated; object-fit: contain;
-        }
-
-        button {
-            background: var(--lava); color: white; border: none;
-            padding: 12px; cursor: pointer; font-weight: bold;
-            width: 100%; border-radius: 6px;
-        }
-
-        .modal {
-            display: none; position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); background: var(--nether-red);
-            padding: 30px; border: 3px solid var(--lava); z-index: 2000;
-            width: 90%; max-width: 600px; border-radius: 15px;
-            max-height: 85vh; overflow-y: auto;
-        }
-
-        input, textarea {
-            width: 100%; padding: 12px; margin: 8px 0;
-            background: #222; border: 1px solid var(--lava);
-            color: white; box-sizing: border-box;
-        }
-
-        /* ÁREA DE UPLOAD (DROPZONE) */
-        .drop-zone {
-            width: 100%; height: 120px; border: 2px dashed var(--gold);
-            border-radius: 10px; display: flex; align-items: center;
-            justify-content: center; flex-direction: column;
-            cursor: pointer; background: rgba(0,0,0,0.3);
-            margin: 10px 0; transition: 0.3s;
-        }
-        .drop-zone:hover { background: rgba(255, 204, 0, 0.1); }
-        .drop-zone p { color: var(--gold); margin: 0; font-size: 14px; pointer-events: none; }
-        #img-preview { max-height: 80px; margin-top: 10px; display: none; border: 1px solid var(--gold); }
-
-        #carrinho-side {
-            position: fixed; right: 0; top: 0; width: 320px; height: 100%;
-            background: var(--nether-dark); border-left: 4px solid var(--lava);
-            padding: 20px; display: none; flex-direction: column; z-index: 1000;
-        }
-
-        .admin-tabs { display: flex; gap: 5px; margin-bottom: 20px; }
-        .tab-btn { background: #555; padding: 10px; cursor:pointer; color: white; border:none; flex: 1; }
-        .tab-btn.active { background: var(--gold); color: black; font-weight: bold; }
-    </style>
-</head>
-<body>
-
-<div class="promo-bar">⚡ BLAZER STORE: A MAIOR LOJA DO NETHER - COMPRE COM SEGURANÇA NA MELHOR LOJA DE TODAS ⚡</div>
-
-<header>
-    <h1 style="color: var(--gold); font-size: 3em; margin: 0;">BLAZER STORE</h1>
-    <p>A MAIOR LOJA DO MUNDO</p>
-    <div style="margin-top: 20px;">
-        <button onclick="abrirLogin()" style="width: auto; background: transparent; border: 1px solid var(--gold); padding: 8px 25px;">ENTRAR NO SISTEMA</button>
-    </div>
-</header>
-
-<div class="container">
-    <div id="produtos-lista"></div>
-</div>
-
-<div id="modal-login" class="modal">
-    <h2 style="text-align: center; color: var(--gold);">IDENTIFIQUE-SE</h2>
-    <input type="password" id="login-pass" placeholder="Insira o código de acesso">
-    <button onclick="verificarLogin()">ENTRAR COMO MESTRE</button>
-    <button onclick="fecharModais()" style="background: #333; margin-top: 10px;">VOLTAR</button>
-</div>
-
-<div id="panel-admin" class="modal">
-    <h2 style="color: var(--gold);">PAINEL DE COMANDO</h2>
-    <div class="admin-tabs">
-        <button class="tab-btn active" onclick="showTab('tab-itens')">ITENS</button>
-        <button class="tab-btn" onclick="showTab('tab-seguranca')">SEGURANÇA</button>
-        <button class="tab-btn" onclick="showTab('tab-codigo')">SCRIPT</button>
-    </div>
-
-    <div id="tab-itens" class="tab-content">
-        <input type="text" id="new-nome" placeholder="Nome do Produto">
-        <input type="number" id="new-preco" placeholder="Preço (Ex: 50.00)">
-        
-        <div class="drop-zone" id="dropZone">
-            <p id="drop-text">Clique ou arraste a imagem aqui</p>
-            <input type="file" id="fileInput" style="display:none" accept="image/*">
-            <img id="img-preview" alt="Preview">
-        </div>
-        <input type="text" id="new-img-url" placeholder="Ou cole o link da imagem aqui">
-
-        <button onclick="addProduto()" style="margin-top: 10px;">ADICIONAR ITEM</button>
-        <div id="admin-lista-itens" style="margin-top: 20px;"></div>
-    </div>
-
-    <div id="tab-seguranca" class="tab-content" style="display:none;">
-        <input type="password" id="old-pass" placeholder="Código Atual">
-        <input type="password" id="new-pass" placeholder="Novo Código">
-        <button onclick="mudarSenhaAdmin()">SALVAR NOVO CÓDIGO</button>
-    </div>
-
-    <div id="tab-codigo" class="tab-content" style="display:none;">
-        <textarea id="custom-js-code" placeholder="// Seu código customizado aqui..."></textarea>
-        <button onclick="salvarCodigoCustom()" style="background: #007bff;">EXECUTAR E SALVAR</button>
-    </div>
-
-    <button onclick="fecharModais()" style="background: #000; margin-top: 20px;">FECHAR PAINEL</button>
-</div>
-
-<div id="carrinho-side">
-    <h2 style="color: var(--gold);">🛒 MEU INVENTÁRIO</h2>
-    <div id="itens-carrinho" style="flex-grow: 1; overflow-y: auto;"></div>
-    <div style="border-top: 2px solid var(--lava); padding-top: 15px;">
-        <h3>TOTAL: R$ <span id="total-carrinho">0.00</span></h3>
-        <button onclick="finalizarPedido()" style="background: #25d366; font-size: 18px; margin-bottom:10px;">FINALIZAR PEDIDO</button>
-        <button onclick="toggleCarrinho()" style="background: #444;">SAIR DO CARRINHO</button>
-    </div>
-</div>
-
-<button onclick="toggleCarrinho()" style="position:fixed; bottom:20px; right:20px; width:auto; padding:15px 25px; border-radius:50px; box-shadow: 0 0 20px var(--lava); z-index: 500;">
-    🛒 CARRINHO: <span id="count-carrinho">0</span>
-</button>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
 <script>
+   const firebaseConfig = {
+  apiKey: "AIzaSyD6Y17O72tr0hLRcKw9q8NQHbjnCK9RUeo",
+  authDomain: "blazerstore-d42ab.firebaseapp.com",
+  projectId: "blazerstore-d42ab",
+  storageBucket: "blazerstore-d42ab.firebasestorage.app",
+  messagingSenderId: "100041581747",
+  appId: "1:100041581747:web:badd8c029a3053589dbcc6",
+  measurementId: "G-BTQ7MCLXMF"
+};
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     let senhaAdmin = localStorage.getItem('site_pass') || "0710";
-    let customScript = localStorage.getItem('custom_js') || "";
-    let produtos = JSON.parse(localStorage.getItem('produtos_blazer')) || [];
+    let produtos = [];
     let carrinho = [];
     let imgBase64 = "";
 
-    // CONFIGURAÇÃO DO UPLOAD E TRAVA DE ARRASTAR
+    // 2. ESCUTAR MUDANÇAS NO BANCO DE DADOS (Funciona para todos os usuários)
+    db.ref('produtos').on('value', (snapshot) => {
+        const data = snapshot.val();
+        produtos = data ? Object.values(data) : [];
+        renderLoja();
+    });
+
+    // Função para Adicionar no Firebase (Substitui o localStorage)
+    function addProduto() {
+        const nome = document.getElementById('new-nome').value;
+        const preco = parseFloat(document.getElementById('new-preco').value);
+        const urlImg = document.getElementById('new-img-url').value;
+        const finalImg = imgBase64 || urlImg || "https://minecraft.wiki/images/Blaze_Rod_JE2_BE2.png";
+
+        if(nome && preco) {
+            const novoItemRef = db.ref('produtos').push();
+            novoItemRef.set({
+                id: novoItemRef.key, // ID único do Firebase
+                nome: nome,
+                preco: preco,
+                img: finalImg
+            }).then(() => {
+                imgBase64 = "";
+                document.getElementById('img-preview').style.display = "none";
+                alert("Produto salvo na nuvem para todos!");
+            });
+        }
+    }
+
+    // Função para Excluir do Firebase
+    function excluirItem(id) {
+        // Encontra a chave do item no Firebase baseada no ID
+        db.ref('produtos').once('value', snapshot => {
+            snapshot.forEach(child => {
+                if(child.val().id === id) {
+                    child.ref.remove();
+                }
+            });
+        });
+    }
+
+    // --- Configuração da DropZone (Mantida) ---
     const fileInput = document.getElementById('fileInput');
     const imgPreview = document.getElementById('img-preview');
-    const dropText = document.getElementById('drop-text');
     const dropZone = document.getElementById('dropZone');
 
-    // Impede o navegador de abrir a imagem ao arrastar
     window.addEventListener("dragover", e => e.preventDefault(), false);
     window.addEventListener("drop", e => e.preventDefault(), false);
-
     dropZone.addEventListener("click", () => fileInput.click());
-    
-    dropZone.addEventListener("dragover", e => {
-        e.preventDefault();
-        dropZone.style.background = "rgba(255, 204, 0, 0.2)";
-    });
-
-    dropZone.addEventListener("dragleave", () => {
-        dropZone.style.background = "rgba(0,0,0,0.3)";
-    });
-
     dropZone.addEventListener("drop", e => {
         e.preventDefault();
-        dropZone.style.background = "rgba(0,0,0,0.3)";
         handleFile(e.dataTransfer.files[0]);
     });
-
     fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
 
     function handleFile(file) {
@@ -212,14 +83,12 @@
                 imgBase64 = e.target.result;
                 imgPreview.src = imgBase64;
                 imgPreview.style.display = "block";
-                dropText.innerText = "Imagem Pronta!";
             };
             reader.readAsDataURL(file);
         }
     }
 
-    if(customScript) { try { eval(customScript); } catch(e) { console.error(e); } }
-
+    // --- Funções de Interface ---
     function renderLoja() {
         const lista = document.getElementById('produtos-lista');
         lista.innerHTML = '';
@@ -229,26 +98,21 @@
                     <img src="${p.img}" alt="${p.nome}">
                     <h3 style="color:var(--gold)">${p.nome}</h3>
                     <p style="font-weight: bold; color: var(--lava)">R$ ${p.preco.toFixed(2)}</p>
-                    <button onclick="addAoCarrinho(${p.id})">COMPRAR ITEM</button>
+                    <button onclick="addAoCarrinho('${p.id}')">COMPRAR ITEM</button>
                 </div>
             `;
         });
-        localStorage.setItem('produtos_blazer', JSON.stringify(produtos));
+        renderAdminList();
     }
 
-    function addProduto() {
-        const nome = document.getElementById('new-nome').value;
-        const preco = parseFloat(document.getElementById('new-preco').value);
-        const urlImg = document.getElementById('new-img-url').value;
-        const finalImg = imgBase64 || urlImg || "https://minecraft.wiki/images/Blaze_Rod_JE2_BE2.png";
-
-        if(nome && preco) {
-            produtos.push({ id: Date.now(), nome, preco, img: finalImg });
-            imgBase64 = ""; imgPreview.style.display = "none";
-            dropText.innerText = "Clique ou arraste a imagem aqui";
-            renderLoja(); renderAdminList();
-            alert("Produto Adicionado!");
-        }
+    function renderAdminList() {
+        const lista = document.getElementById('admin-lista-itens');
+        lista.innerHTML = '<h4>Gerenciar Nuvem</h4>';
+        produtos.forEach(p => {
+            lista.innerHTML += `<div style="display:flex; justify-content:space-between; background:#111; padding:8px; margin-bottom:5px;">
+                <span>${p.nome}</span> <button onclick="excluirItem('${p.id}')" style="width:auto; background:red; font-size:10px;">EXCLUIR</button>
+            </div>`;
+        });
     }
 
     function abrirLogin() { document.getElementById('modal-login').style.display = 'block'; }
@@ -257,27 +121,16 @@
         if(document.getElementById('login-pass').value === senhaAdmin) {
             fecharModais();
             document.getElementById('panel-admin').style.display = 'block';
-            renderAdminList();
-            document.getElementById('custom-js-code').value = customScript;
         } else { alert("Senha Incorreta!"); }
     }
-    function showTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(tabId).style.display = 'block';
-        event.currentTarget.classList.add('active');
-    }
 
-    function toggleCarrinho() {
-        const side = document.getElementById('carrinho-side');
-        side.style.display = (side.style.display === 'flex') ? 'none' : 'flex';
-    }
     function addAoCarrinho(id) {
         const p = produtos.find(item => item.id === id);
         carrinho.push({...p, cartId: Date.now()});
         atualizarCarrinho();
         document.getElementById('carrinho-side').style.display = 'flex';
     }
+
     function atualizarCarrinho() {
         const lista = document.getElementById('itens-carrinho');
         let total = 0; lista.innerHTML = '';
@@ -285,51 +138,35 @@
             total += item.preco;
             lista.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; background:rgba(0,0,0,0.3); margin-bottom:5px; align-items:center;">
                 <span style="font-size:12px;">${item.nome}</span>
-                <button onclick="removerItem(${item.cartId})" style="width:auto; padding:2px 8px; background:red; font-size:10px;">X</button>
+                <button onclick="removerItem(${item.cartId})" style="width:auto; padding:2px 8px; background:red;">X</button>
             </div>`;
         });
         document.getElementById('total-carrinho').innerText = total.toFixed(2);
         document.getElementById('count-carrinho').innerText = carrinho.length;
     }
+
     function removerItem(cartId) {
         carrinho = carrinho.filter(i => i.cartId !== cartId);
         atualizarCarrinho();
     }
+
     function finalizarPedido() {
         if(carrinho.length === 0) return;
-        let msg = "oi, finalizei meu carrinho.\n\n";
+        let msg = "oi, finalizei meu carrinho no seu site.\n\n";
         carrinho.forEach(i => msg += `- ${i.nome}\n`);
         msg += `\n*TOTAL: R$ ${document.getElementById('total-carrinho').innerText}*`;
         window.open(`https://wa.me/5521970808960?text=${encodeURIComponent(msg)}`);
     }
 
-    function renderAdminList() {
-        const lista = document.getElementById('admin-lista-itens');
-        lista.innerHTML = '<h4>Gerenciar Itens</h4>';
-        produtos.forEach(p => {
-            lista.innerHTML += `<div style="display:flex; justify-content:space-between; background:#111; padding:8px; margin-bottom:5px; border-radius:5px;">
-                <span>${p.nome}</span> <button onclick="excluirItem(${p.id})" style="width:auto; background:red; font-size:10px;">EXCLUIR</button>
-            </div>`;
-        });
-    }
-    function excluirItem(id) {
-        produtos = produtos.filter(p => p.id !== id);
-        renderLoja(); renderAdminList();
-    }
-    function mudarSenhaAdmin() {
-        if(document.getElementById('old-pass').value === senhaAdmin) {
-            senhaAdmin = document.getElementById('new-pass').value;
-            localStorage.setItem('site_pass', senhaAdmin);
-            alert("Senha alterada!");
-        }
-    }
-    function salvarCodigoCustom() {
-        localStorage.setItem('custom_js', document.getElementById('custom-js-code').value);
-        location.reload();
+    function toggleCarrinho() {
+        const side = document.getElementById('carrinho-side');
+        side.style.display = (side.style.display === 'flex') ? 'none' : 'flex';
     }
 
-    renderLoja();
+    function showTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).style.display = 'block';
+        event.currentTarget.classList.add('active');
+    }
 </script>
-
-</body>
-</html>
